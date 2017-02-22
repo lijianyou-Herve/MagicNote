@@ -8,16 +8,6 @@
 
     tools:context="example.herve.com.magicnote.MainActivity">
 
-    <Button
-        android:id="@+id/btn_start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerInParent="true"
-        android:text="音符酱——GO"
-        />
-
-
     <ImageView
         android:id="@+id/iv_note_boy"
         android:layout_width="wrap_content"

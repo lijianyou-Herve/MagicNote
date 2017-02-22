@@ -2,19 +2,15 @@ package example.herve.com.magicnote;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -25,7 +21,6 @@ import example.herve.com.magicnote.utils.DialogUtils;
 public class MainActivity extends AppCompatActivity {
 
     private RelativeLayout activityMain;
-    private Button btnStart;
     private RecyclerView rvRoad;
     private ImageView ivNoteBoy;
     private AudioRecordDemo audioRecordDemo;
@@ -44,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         mContext = this;
         setContentView(R.layout.activity_main);
         activityMain = (RelativeLayout) findViewById(R.id.activity_main);
-        btnStart = (Button) findViewById(R.id.btn_start);
         rvRoad = (RecyclerView) findViewById(R.id.rv_road);
         ivNoteBoy = (ImageView) findViewById(R.id.iv_note_boy);
 
@@ -58,10 +52,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void initData() {
         data = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 200; i++) {
             data.add(i);
         }
         roadAdapter = new RoadAdapter(data, mContext);
+
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false);
 
         rvRoad.setLayoutManager(layoutManager);
@@ -76,30 +71,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initListener() {
-        btnStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                reset = false;
-            }
-        });
 
         rvRoad.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                stop();
-                return false;
+                return true;
             }
         });
 
         audioRecordDemo.setVolumeListener(new VolumeListener() {
             @Override
             public void volumeChangeListener(double volumeValue) {
-                if (!reset) {
+                if (isShowMessage) {
                     return;
                 }
-                if (volumeValue > 30) {
-                    start();
-                    ivNoteBoy.setTranslationY(-(float) volumeValue);
+                if (volumeValue > 40) {
+                    if (!start) {
+                        start();
+                    }
+                    float test = (float) (Math.sqrt(volumeValue - 30) * 10);
+                    Log.i(TAG, "volumeChangeListener: test=" + test);
+                    float tranY = test + (float) volumeValue;
+                    tranY = (float) (volumeValue * volumeValue / (2 * 10));
+                    Log.i(TAG, "volumeChangeListener: tranY=" + tranY);
+
+                    ivNoteBoy.setTranslationY(-tranY);
                 } else {
                     if (!start) {
                         return;
@@ -118,10 +114,11 @@ public class MainActivity extends AppCompatActivity {
                                         @Override
                                         public void run() {
                                             stop();
+                                            isShowMessage = true;
                                             DialogUtils.showDialog(mContext, "你已死亡！", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialogInterface, int i) {
-                                                    reset = true;
+                                                    isShowMessage = false;
                                                     rvRoad.scrollToPosition(0);
                                                 }
                                             });
@@ -142,21 +139,19 @@ public class MainActivity extends AppCompatActivity {
         start = false;
     }
 
-    private int tranX = 0;
     private boolean start = false;
-    private boolean reset = true;
+    private boolean isShowMessage = false;
 
     private Runnable goon = new Runnable() {
         @Override
         public void run() {
             rvRoad.scrollBy((int) rvRoad.getX() + 1, (int) rvRoad.getY());
-            tranX = +1;
             start();
         }
     };
 
     private void start() {
-        rvRoad.postDelayed(goon, 50);
+        rvRoad.postDelayed(goon, 2);
         start = true;
     }
 }

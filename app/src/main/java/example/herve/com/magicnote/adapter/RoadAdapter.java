@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import example.herve.com.magicnote.R;
+import example.herve.com.magicnote.utils.Ui;
 
 /**
  * Created           :Herve on 2017/2/22.
@@ -40,13 +41,26 @@ public class RoadAdapter extends RecyclerView.Adapter<RoadAdapter.RoadViewHolder
 
     @Override
     public void onBindViewHolder(RoadViewHolder holder, int position) {
-        if (position % 3 == 0) {
-            holder.itemView.setTag("W");
-            holder.itemView.setBackgroundColor(Color.WHITE);
-        } else {
+        ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
+
+        if (position == 0) {
             holder.itemView.setTag("B");
             holder.itemView.setBackgroundColor(Color.BLACK);
+            marginLayoutParams.width = Ui.dp2px(mContext, (float) (150));
+        } else {
+            int random = (int) (Math.random() * 100);
+            if (random > 80) {
+                holder.itemView.setTag("W");
+                holder.itemView.setBackgroundColor(Color.WHITE);
+                marginLayoutParams.width = Ui.dp2px(mContext, (float) (30 + Math.random() * 50));
+            } else {
+                holder.itemView.setTag("B");
+                holder.itemView.setBackgroundColor(Color.BLACK);
+                marginLayoutParams.width = Ui.dp2px(mContext, (float) (50 + Math.random() * 30));
+            }
         }
+
+        holder.itemView.setLayoutParams(marginLayoutParams);
 
     }
 
