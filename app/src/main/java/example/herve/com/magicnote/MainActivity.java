@@ -1,6 +1,7 @@
 package example.herve.com.magicnote;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 
 import example.herve.com.magicnote.adapter.RoadAdapter;
 import example.herve.com.magicnote.listener.VolumeListener;
+import example.herve.com.magicnote.utils.DialogUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,16 +68,18 @@ public class MainActivity extends AppCompatActivity {
         rvRoad.setAdapter(roadAdapter);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        audioRecordDemo.getNoiseLevel();
+
+    }
+
     private void initListener() {
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                audioRecordDemo.getNoiseLevel();
-                if (start) {
-                    stop();
-                } else {
-                    start();
-                }
+                reset = false;
             }
         });
 
@@ -90,6 +94,9 @@ public class MainActivity extends AppCompatActivity {
         audioRecordDemo.setVolumeListener(new VolumeListener() {
             @Override
             public void volumeChangeListener(double volumeValue) {
+                if (!reset) {
+                    return;
+                }
                 if (volumeValue > 30) {
                     start();
                     ivNoteBoy.setTranslationY(-(float) volumeValue);
@@ -102,20 +109,22 @@ public class MainActivity extends AppCompatActivity {
                     if (rvRoad.getLayoutManager() instanceof LinearLayoutManager) {
                         int firstPosition = ((LinearLayoutManager) rvRoad.getLayoutManager()).findFirstVisibleItemPosition();
                         int lastPosition = ((LinearLayoutManager) rvRoad.getLayoutManager()).findLastVisibleItemPosition();
-
                         int count = lastPosition - firstPosition;
-
                         for (int i = 0; i < count; i++) {
                             View view = rvRoad.getChildAt(i);
                             if (view.getTag().equals("W")) {
-                                if (view.getX() < (ivNoteBoy.getX() + ivNoteBoy.getWidth() * 2 / 3) && view.getX() + view.getWidth() > ivNoteBoy.getX() - ivNoteBoy.getWidth() * 2 / 3) {
-                                    Log.i(TAG, "volumeChangeListener:死了 ");
+                                if (view.getX() < (ivNoteBoy.getX() + ivNoteBoy.getWidth() * 2 / 3) && view.getX() + view.getWidth() > (ivNoteBoy.getX() + ivNoteBoy.getWidth() * 1 / 3)) {
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             stop();
-                                            Toast.makeText(mContext, "游戏失败！", Toast.LENGTH_SHORT).show();
-                                            rvRoad.scrollToPosition(0);
+                                            DialogUtils.showDialog(mContext, "你已死亡！", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    reset = true;
+                                                    rvRoad.scrollToPosition(0);
+                                                }
+                                            });
                                         }
                                     });
                                 }
@@ -135,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int tranX = 0;
     private boolean start = false;
+    private boolean reset = true;
 
     private Runnable goon = new Runnable() {
         @Override
