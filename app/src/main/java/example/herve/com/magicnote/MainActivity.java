@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                                         public void run() {
                                             stop();
                                             Toast.makeText(mContext, "游戏失败！", Toast.LENGTH_SHORT).show();
-                                            rvRoad.scrollBy(-tranX, (int) rvRoad.getY());
+                                            rvRoad.scrollToPosition(0);
                                         }
                                     });
                                 }
